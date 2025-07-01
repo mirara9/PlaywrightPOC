@@ -104,18 +104,22 @@ bash scripts/setup-playwright.sh
 
 ## 📁 Environment-Specific Notes
 
+### Windows
+- **See [WINDOWS-SETUP.md](./WINDOWS-SETUP.md) for detailed Windows instructions**
+- System dependencies handled automatically by Playwright
+- Use npm scripts instead of direct environment variables
+- PowerShell recommended over Command Prompt
+
 ### WSL (Windows Subsystem for Linux)
 - Automatic detection and appropriate dependency installation
 - May require `sudo` for system dependencies
+- Follow Linux instructions
 
 ### Linux
 - Supports APT, YUM, DNF, and Pacman package managers
 - Automatic detection of package manager
 
 ### macOS
-- System dependencies handled automatically by Playwright
-
-### Windows
 - System dependencies handled automatically by Playwright
 
 ### Docker
