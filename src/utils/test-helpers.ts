@@ -70,8 +70,10 @@ export class TestHelpers {
   }
 
   static async takeFullPageScreenshot(page: Page, name: string): Promise<void> {
+    const path = require('path');
+    const screenshotPath = path.join('test-results', 'screenshots', `${name}-${Date.now()}.png`);
     await page.screenshot({
-      path: `test-results/screenshots/${name}-${Date.now()}.png`,
+      path: screenshotPath,
       fullPage: true
     });
   }
@@ -130,12 +132,13 @@ export class TestHelpers {
   }
 
   static async downloadFile(page: Page, downloadTrigger: () => Promise<void>): Promise<string> {
+    const path = require('path');
     const downloadPromise = page.waitForEvent('download');
     await downloadTrigger();
     const download = await downloadPromise;
-    const path = `downloads/${await download.suggestedFilename()}`;
-    await download.saveAs(path);
-    return path;
+    const downloadPath = path.join('downloads', await download.suggestedFilename());
+    await download.saveAs(downloadPath);
+    return downloadPath;
   }
 
   static async handleAlert(page: Page, accept: boolean = true, text?: string): Promise<void> {

@@ -4,12 +4,16 @@ An extensible Playwright test framework with reusable API and UI wrappers, desig
 
 ## Features
 
-- **Extensible API Wrapper**: Base classes for creating API test wrappers with built-in retry logic, response validation, and error handling
-- **Extensible UI Wrapper**: Base page objects and components for UI testing with common operations and assertions
-- **TypeScript Support**: Full TypeScript support with proper typing and IntelliSense
-- **Modular Architecture**: Separated concerns with clear separation between API wrappers, UI wrappers, and test utilities
-- **Test Data Management**: Centralized test data generation and management
-- **Utility Functions**: Common test helpers for screenshots, network mocking, and more
+- **🌍 Cross-Platform Compatible**: Works seamlessly on Windows, Linux, macOS, and WSL
+- **🔄 Auto-Retry Capability**: NUnit-style retry with complete browser reinitialization (3 retries by default)
+- **🚀 Automatic Setup**: Zero-configuration setup with automatic dependency management
+- **📦 Extensible API Wrapper**: Base classes for creating API test wrappers with built-in retry logic, response validation, and error handling
+- **🎭 Extensible UI Wrapper**: Base page objects and components for UI testing with common operations and assertions
+- **🐳 Docker Support**: Complete containerization with Docker and docker-compose
+- **📝 TypeScript Support**: Full TypeScript support with proper typing and IntelliSense
+- **🏗️ Modular Architecture**: Separated concerns with clear separation between API wrappers, UI wrappers, and test utilities
+- **📊 Test Data Management**: Centralized test data generation and management
+- **🛠️ Utility Functions**: Common test helpers for screenshots, network mocking, and more
 
 ## Project Structure
 
@@ -71,6 +75,10 @@ sudo npx playwright install-deps  # Manual dependency installation
 ```
 
 For detailed setup instructions, see [SETUP.md](./SETUP.md).
+
+### 🌍 Platform-Specific Guides
+- **Windows**: See [WINDOWS-SETUP.md](./WINDOWS-SETUP.md)
+- **Cross-Platform**: See [CROSS-PLATFORM.md](./CROSS-PLATFORM.md)
 
 ## Installation
 
