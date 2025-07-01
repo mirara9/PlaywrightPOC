@@ -80,18 +80,23 @@ export class TestHelpers {
 
   static async retryAction<T>(
     action: () => Promise<T>,
-    maxRetries: number = 3,
+    attempts: number = 3,
     delay: number = 1000
   ): Promise<T> {
     let lastError: Error;
     
-    for (let i = 0; i <= maxRetries; i++) {
+    // Validate attempts (must be >= 1 for basic action, >= 2 for retries)
+    if (attempts < 1) {
+      attempts = 1;
+    }
+    
+    for (let i = 1; i <= attempts; i++) {
       try {
         return await action();
       } catch (error) {
         lastError = error as Error;
-        if (i < maxRetries) {
-          await this.delay(delay * (i + 1));
+        if (i < attempts) {
+          await this.delay(delay * i);
         }
       }
     }

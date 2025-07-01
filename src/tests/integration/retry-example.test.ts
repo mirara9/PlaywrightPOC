@@ -40,7 +40,7 @@ test.describe('Retry Functionality Examples', () => {
     
     console.log('✅ Login test passed');
   }, {
-    maxRetries: 3,
+    attempts: 3,
     retryDelay: 2000,
     resetDataBetweenRetries: true,
     reinitializeBrowser: true
@@ -73,7 +73,7 @@ test.describe('Retry Functionality Examples', () => {
       
       console.log('✅ API test passed');
     }, {
-      maxRetries: 5,
+      attempts: 5,
       retryDelay: 1500,
       resetDataBetweenRetries: false,
       reinitializeBrowser: true
@@ -132,7 +132,7 @@ test.describe('Retry Functionality Examples', () => {
       
       console.log('✅ API retry test passed');
     }, {
-      maxRetries: 3,
+      attempts: 3,
       retryDelay: 1000,
       resetDataBetweenRetries: true,
       reinitializeBrowser: false // API tests don't need browser restart
@@ -166,7 +166,7 @@ test.describe('Retry Functionality Examples', () => {
       
       console.log('✅ Browser recovery test passed');
     }, {
-      maxRetries: 3,
+      attempts: 3,
       retryDelay: 2000,
       resetDataBetweenRetries: true,
       reinitializeBrowser: true // Force browser restart between retries
@@ -193,7 +193,7 @@ test.describe('Retry Functionality Examples', () => {
       expect(loadTime).toBeLessThan(10000);
       console.log(`✅ Page loaded in ${loadTime}ms`);
     }, {
-      maxRetries: 3,
+      attempts: 3,
       retryDelay: 3000,
       resetDataBetweenRetries: false,
       reinitializeBrowser: true
@@ -204,7 +204,7 @@ test.describe('Retry Functionality Examples', () => {
 // Example of a test class using the retry decorator (commented out due to decorator issues)
 /*
 class RetryTestClass {
-  @RetryHelper.retry({ maxRetries: 3, retryDelay: 1500 })
+  @RetryHelper.retry({ attempts: 3, retryDelay: 1500 })
   async performLoginTest(page: Page, context: BrowserContext, browser: Browser) {
     const loginPage = new TestLoginPage(page);
     await page.goto('/');

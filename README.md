@@ -5,7 +5,7 @@ An extensible Playwright test framework with reusable API and UI wrappers, desig
 ## Features
 
 - **🌍 Cross-Platform Compatible**: Works seamlessly on Windows, Linux, macOS, and WSL
-- **🔄 Auto-Retry Capability**: NUnit-style retry with complete browser reinitialization (3 retries by default)
+- **🔄 NUnit-Style Auto-Retry**: Complete RetryAttribute compatibility with assertion-only retries and browser reinitialization
 - **🚀 Automatic Setup**: Zero-configuration setup with automatic dependency management
 - **📦 Extensible API Wrapper**: Base classes for creating API test wrappers with built-in retry logic, response validation, and error handling
 - **🎭 Extensible UI Wrapper**: Base page objects and components for UI testing with common operations and assertions
@@ -136,6 +136,99 @@ npm test src/tests/integration/
 
 # Run tests with specific grep pattern
 npm test -- --grep "login"
+```
+
+## 🔄 NUnit-Style Retry Functionality
+
+This framework implements **100% compatible** NUnit RetryAttribute semantics for robust test execution:
+
+### Key Features
+- ✅ **Total Attempts**: `attempts: 3` = 3 total attempts (1 initial + 2 retries)
+- ✅ **Minimum Validation**: `attempts: 1` does nothing (just like NUnit's `[Retry(1)]`)
+- ✅ **Assertion-Only Retries**: Only assertion failures trigger retries, not unexpected exceptions
+- ✅ **Browser Reinitialization**: Fresh browser state for each retry attempt
+- ✅ **Test Data Reset**: Optional data cleanup between attempts
+
+### Quick Examples
+
+#### Basic Retry Test
+```typescript
+import { retryTest } from './src/utils';
+
+retryTest('flaky login test', async (page, context, browser) => {
+  await page.goto('/login');
+  await page.fill('[data-testid="email"]', 'user@example.com');
+  await page.fill('[data-testid="password"]', 'password');
+  await page.click('[data-testid="login-button"]');
+  
+  // This assertion will trigger retries if it fails
+  await expect(page.locator('[data-testid="dashboard"]')).toBeVisible();
+}, {
+  attempts: 3,        // 3 total attempts (1 initial + 2 retries)
+  retryDelay: 2000,   // 2 second delay between attempts
+  reinitializeBrowser: true,  // Fresh browser for each attempt
+  resetDataBetweenRetries: true  // Clean test data between attempts
+});
+```
+
+#### Custom Retry Logic
+```typescript
+import { RetryHelper } from './src/utils';
+
+test('API test with retry', async ({ browser }) => {
+  await RetryHelper.withRetry(async (page, context, browser) => {
+    await page.goto('/api-test');
+    
+    // Only assertion failures will trigger retries
+    const response = await page.evaluate(() => fetch('/api/users').then(r => r.json()));
+    expect(response.users).toHaveLength(5);  // ✅ Will retry if this fails
+    
+    // Unexpected exceptions will NOT trigger retries (NUnit behavior)
+    // throw new TypeError('Network error');  // ❌ Would fail immediately
+  }, {
+    attempts: 5,
+    retryDelay: 1000,
+    reinitializeBrowser: false  // Keep same browser for API tests
+  });
+});
+```
+
+#### Flaky Element Assertions
+```typescript
+import { expectWithRetry } from './src/utils';
+
+test('robust element testing', async ({ page }) => {
+  await page.goto('/');
+  
+  // Retry flaky element assertions with custom timeout
+  await expectWithRetry(
+    async () => await page.locator('[data-testid="dynamic-content"]').isVisible(),
+    (isVisible) => expect(isVisible).toBe(true),
+    { timeout: 10000, interval: 500 }
+  );
+});
+```
+
+### NUnit Compatibility
+
+| NUnit C# | This Framework | Behavior |
+|----------|---------------|----------|
+| `[Retry(3)]` | `attempts: 3` | 3 total attempts |
+| `[Retry(1)]` | `attempts: 1` | Does nothing (no retries) |
+| Assertion failures | ✅ | Triggers retries |
+| Unexpected exceptions | ❌ | No retry (fails immediately) |
+
+For complete documentation, see [NUNIT-RETRY-SEMANTICS.md](./NUNIT-RETRY-SEMANTICS.md).
+
+### Testing the Retry Logic
+
+Run the retry validation tests:
+```bash
+# Test retry functionality with real tests
+npm run test:retry
+
+# Test retry semantics without browser dependencies
+node test-retry-simple.js
 ```
 
 ## Docker Setup

@@ -42,7 +42,7 @@ test.describe('Login UI Tests with Retry', () => {
     // Check page title
     await expect(page).toHaveTitle(/Test Login Application/);
   }, {
-    maxRetries: 3,
+    attempts: 3,
     retryDelay: 2000,
     resetDataBetweenRetries: false,
     reinitializeBrowser: true
@@ -69,7 +69,7 @@ test.describe('Login UI Tests with Retry', () => {
     const userName = await loginPage.getUserName();
     expect(userName).toBe('John Doe');
   }, {
-    maxRetries: 3,
+    attempts: 3,
     retryDelay: 2000,
     resetDataBetweenRetries: true, // Reset data between retries
     reinitializeBrowser: true
@@ -97,7 +97,7 @@ test.describe('Login UI Tests with Retry', () => {
       const errorText = await loginPage.errorMessageLocator.textContent();
       expect(errorText).toContain('Invalid credentials');
     }, {
-      maxRetries: 2,
+      attempts: 2,
       retryDelay: 1000,
       resetDataBetweenRetries: false,
       reinitializeBrowser: true
@@ -153,7 +153,7 @@ test.describe('Login UI Tests with Retry', () => {
       { timeout: 10000, interval: 500 }
     );
   }, {
-    maxRetries: 3,
+    attempts: 3,
     retryDelay: 3000,
     resetDataBetweenRetries: true,
     reinitializeBrowser: true
@@ -185,7 +185,7 @@ test.describe('Login UI Tests with Retry', () => {
       const userName = await loginPage.getUserName();
       expect(userName).toBe('Admin User');
     }, {
-      maxRetries: 3,
+      attempts: 3,
       retryDelay: 2000,
       resetDataBetweenRetries: true,
       reinitializeBrowser: true
@@ -222,7 +222,7 @@ test.describe('Login UI Tests with Retry', () => {
     
     console.log('✅ Rapid login test completed');
   }, {
-    maxRetries: 2,
+    attempts: 2,
     retryDelay: 2000,
     resetDataBetweenRetries: true,
     reinitializeBrowser: true

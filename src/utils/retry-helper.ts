@@ -2,7 +2,12 @@ import { test, expect, Browser, BrowserContext, Page, TestInfo } from '@playwrig
 import { TestHelpers } from './test-helpers';
 
 export interface RetryOptions {
-  maxRetries?: number;
+  /** 
+   * Total number of attempts (not retries after failure)
+   * Must be >= 2 to have any effect (following NUnit behavior)
+   * Default: 3 attempts (2 retries after initial failure)
+   */
+  attempts?: number;
   retryDelay?: number;
   resetDataBetweenRetries?: boolean;
   reinitializeBrowser?: boolean;
@@ -10,7 +15,7 @@ export interface RetryOptions {
 
 export class RetryHelper {
   private static readonly DEFAULT_OPTIONS: Required<RetryOptions> = {
-    maxRetries: 3,
+    attempts: 3, // 3 attempts = 1 initial + 2 retries (matching NUnit default)
     retryDelay: 1000,
     resetDataBetweenRetries: true,
     reinitializeBrowser: true,
@@ -30,9 +35,41 @@ export class RetryHelper {
     let context: BrowserContext | undefined;
     let page: Page | undefined;
 
-    for (let attempt = 1; attempt <= opts.maxRetries; attempt++) {
+    // Validate attempts (must be >= 2 to have any effect, following NUnit behavior)
+    if (opts.attempts < 2) {
+      console.log(`⚠️ Retry attempts set to ${opts.attempts}, but minimum is 2 for retries to work (NUnit behavior)`);
+      
+      // For attempts < 2, just run once without retry logic
+      const { chromium } = require('@playwright/test');
+      browser = await chromium.launch({
+        headless: process.env.HEADLESS === 'true',
+        slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
+      });
+      
+      if (!browser) {
+        throw new Error('Failed to launch browser');
+      }
+      
+      context = await browser.newContext({
+        viewport: { width: 1280, height: 720 },
+        ignoreHTTPSErrors: true,
+      });
+      
+      page = await context.newPage();
+      
       try {
-        console.log(`🔄 Retry attempt ${attempt}/${opts.maxRetries}`);
+        const result = await testFn(page, context, browser);
+        return result;
+      } finally {
+        if (page) await page.close().catch(() => {});
+        if (context) await context.close().catch(() => {});
+        if (browser) await browser.close().catch(() => {});
+      }
+    }
+
+    for (let attempt = 1; attempt <= opts.attempts; attempt++) {
+      try {
+        console.log(`🔄 Attempt ${attempt}/${opts.attempts}`);
 
         // Clean up previous attempt
         if (page) {
@@ -84,14 +121,40 @@ export class RetryHelper {
         lastError = error as Error;
         console.log(`❌ Attempt ${attempt} failed:`, (error as Error).message);
 
+        // Check if this is an assertion failure (retryable) vs unexpected exception (not retryable)
+        const err = error as Error;
+        const isAssertionFailure = err && (
+          err.name === 'AssertionError' ||
+          err.message.includes('expect') ||
+          err.message.includes('assertion') ||
+          err.message.includes('toBe') ||
+          err.message.includes('toEqual') ||
+          err.message.includes('toContain')
+        );
+        
+        // Additional check: if it's explicitly a TypeError, SyntaxError, ReferenceError, etc., it's not an assertion
+        const isUnexpectedException = err && (
+          error instanceof TypeError ||
+          error instanceof SyntaxError ||
+          error instanceof ReferenceError ||
+          err.name === 'TypeError' ||
+          err.name === 'SyntaxError' ||
+          err.name === 'ReferenceError'
+        );
+
+        if (!isAssertionFailure || isUnexpectedException) {
+          console.log(`💥 Unexpected exception (not retryable): ${err.message}`);
+          throw error; // Don't retry unexpected exceptions (NUnit behavior)
+        }
+
         // If this is the last attempt, don't wait
-        if (attempt < opts.maxRetries) {
+        if (attempt < opts.attempts) {
           console.log(`⏳ Waiting ${opts.retryDelay}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, opts.retryDelay));
         }
       } finally {
         // Clean up on final attempt or if successful
-        if (attempt === opts.maxRetries || !lastError) {
+        if (attempt === opts.attempts || !lastError) {
           if (page) {
             await page.close().catch(() => {});
           }
@@ -105,8 +168,8 @@ export class RetryHelper {
       }
     }
 
-    // All retries failed
-    console.log(`💥 All ${opts.maxRetries} attempts failed`);
+    // All attempts failed
+    console.log(`💥 All ${opts.attempts} attempts failed`);
     throw lastError || new Error('Test failed after all retry attempts');
   }
 
@@ -120,7 +183,7 @@ export class RetryHelper {
       // Override Playwright's built-in retry to use our custom logic
       await this.withRetry(testFn, {
         ...opts,
-        maxRetries: testInfo.retry < opts.maxRetries ? opts.maxRetries : 1,
+        attempts: testInfo.retry < opts.attempts ? opts.attempts : 1,
       });
     });
   }
