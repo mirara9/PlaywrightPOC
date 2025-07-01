@@ -42,17 +42,45 @@ playwright-test-framework/
 └── package.json                    # Dependencies and scripts
 ```
 
+## Quick Start
+
+### 🚀 Automatic Setup (Recommended)
+
+```bash
+git clone <repository>
+cd playwright-test-framework
+npm install  # Automatically installs all dependencies including Playwright browsers
+npm run verify  # Verify everything is working
+npm test  # Run your first tests
+```
+
+**That's it!** The framework automatically handles:
+- ✅ Node.js dependencies
+- ✅ Playwright browser installation
+- ✅ System dependencies (Linux/Ubuntu/WSL)
+- ✅ Browser launch verification
+
+### 🔧 Troubleshooting
+
+If you encounter the "missing dependencies" error:
+
+```bash
+npm run setup:force  # Force fresh setup
+# or
+sudo npx playwright install-deps  # Manual dependency installation
+```
+
+For detailed setup instructions, see [SETUP.md](./SETUP.md).
+
 ## Installation
 
 1. Clone or copy this framework to your project
 2. Install dependencies:
    ```bash
-   npm install
+   npm install  # Now includes automatic Playwright setup!
    ```
-3. Install Playwright browsers:
-   ```bash
-   npx playwright install
-   ```
+
+   *(Browsers and system dependencies are installed automatically!)*
 
 ## Usage
 
