@@ -276,7 +276,7 @@ test.describe('Test Login API - Backend Tests', () => {
       
       const responseBody = await response.json();
       expect(responseBody.success).toBe(false);
-      expect(responseBody.message).toBe('Name, email, and password are required');
+      expect(responseBody.message).toBe('Name and email are required');
     });
   });
 

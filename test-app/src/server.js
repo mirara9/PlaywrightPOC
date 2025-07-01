@@ -12,10 +12,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Mock users database
 const users = [
-    { id: 1, email: 'john.doe@example.com', password: 'SecurePass123!', name: 'John Doe' },
-    { id: 2, email: 'jane.smith@example.com', password: 'SecurePass456!', name: 'Jane Smith' },
-    { id: 3, email: 'admin@example.com', password: 'AdminPass789!', name: 'Admin User' },
-    { id: 4, email: 'test@example.com', password: 'password123', name: 'Test User' }
+    { id: 1, email: 'john.doe@example.com', password: 'SecurePass123!', name: 'John Doe', username: 'johndoe' },
+    { id: 2, email: 'jane.smith@example.com', password: 'SecurePass456!', name: 'Jane Smith', username: 'janesmith' },
+    { id: 3, email: 'admin@example.com', password: 'AdminPass789!', name: 'Admin User', username: 'admin' },
+    { id: 4, email: 'test@example.com', password: 'password123', name: 'Test User', username: 'testuser' }
 ];
 
 // API Routes
@@ -91,12 +91,12 @@ app.get('/api/users/:id', (req, res) => {
 });
 
 app.post('/api/users', (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, username } = req.body;
     
-    if (!name || !email || !password) {
+    if (!name || !email) {
         return res.status(400).json({
             success: false,
-            message: 'Name, email, and password are required'
+            message: 'Name and email are required'
         });
     }
     
@@ -108,11 +108,20 @@ app.post('/api/users', (req, res) => {
         });
     }
     
+    // Check if username already exists
+    if (username && users.find(u => u.username === username)) {
+        return res.status(409).json({
+            success: false,
+            message: 'User with this username already exists'
+        });
+    }
+    
     const newUser = {
         id: users.length + 1,
         name,
         email,
-        password
+        password: password || 'defaultPassword123!',
+        username: username || name.toLowerCase().replace(/\s+/g, '')
     };
     
     users.push(newUser);
@@ -122,6 +131,74 @@ app.post('/api/users', (req, res) => {
         success: true,
         message: 'User created successfully',
         user: userWithoutPassword
+    });
+});
+
+// Update user endpoint
+app.put('/api/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const { name, email, password, username } = req.body;
+    
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            message: 'User not found'
+        });
+    }
+    
+    // Check if email is being changed and already exists
+    if (email && email !== users[userIndex].email) {
+        if (users.find(u => u.email === email && u.id !== userId)) {
+            return res.status(409).json({
+                success: false,
+                message: 'User with this email already exists'
+            });
+        }
+    }
+    
+    // Check if username is being changed and already exists
+    if (username && username !== users[userIndex].username) {
+        if (users.find(u => u.username === username && u.id !== userId)) {
+            return res.status(409).json({
+                success: false,
+                message: 'User with this username already exists'
+            });
+        }
+    }
+    
+    // Update user fields
+    if (name) users[userIndex].name = name;
+    if (email) users[userIndex].email = email;
+    if (password) users[userIndex].password = password;
+    if (username) users[userIndex].username = username;
+    
+    const { password: _, ...userWithoutPassword } = users[userIndex];
+    res.json({
+        success: true,
+        message: 'User updated successfully',
+        user: userWithoutPassword
+    });
+});
+
+// Delete user endpoint
+app.delete('/api/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            message: 'User not found'
+        });
+    }
+    
+    users.splice(userIndex, 1);
+    
+    res.json({
+        success: true,
+        message: 'User deleted successfully'
     });
 });
 

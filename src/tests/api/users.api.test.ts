@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { ExampleApiWrapper, CreateUserRequest } from '../../wrappers/api';
+import { TestApiWrapper, CreateTestUserRequest } from '../../wrappers/api';
 import { TestDataManager } from '../../utils';
 
 test.describe('Users API Tests', () => {
-  let apiWrapper: ExampleApiWrapper;
+  let apiWrapper: TestApiWrapper;
   let testData: TestDataManager;
 
   test.beforeEach(async ({ request }) => {
-    apiWrapper = new ExampleApiWrapper(request);
+    apiWrapper = new TestApiWrapper(request);
     testData = TestDataManager.getInstance();
   });
 
@@ -38,7 +38,7 @@ test.describe('Users API Tests', () => {
 
   test('should create a new user', async () => {
     const newUser = testData.generateRandomUser();
-    const createUserData: CreateUserRequest = {
+    const createUserData: CreateTestUserRequest = {
       name: newUser.name,
       email: newUser.email,
       username: newUser.username
@@ -74,7 +74,7 @@ test.describe('Users API Tests', () => {
   });
 
   test('should search users by name', async () => {
-    const searchTerm = 'Leanne';
+    const searchTerm = 'John';
     const users = await apiWrapper.searchUsers(searchTerm);
     
     expect(users).toBeDefined();
