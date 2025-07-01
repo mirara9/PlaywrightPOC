@@ -1,0 +1,63 @@
+name: Simple Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  basic-test:
+    name: Basic Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: List files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in root:"
+          ls -la
+          echo "Package.json exists:"
+          cat package.json | head -10
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install test-app dependencies
+        run: |
+          cd test-app
+          npm ci
+
+      - name: Check Playwright
+        run: |
+          echo "Playwright version:"
+          npx playwright --version
+          echo "Installing browsers:"
+          npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          echo "Starting test server..."
+          cd test-app
+          npm start &
+          echo "Waiting for server..."
+          sleep 10
+          echo "Testing server health:"
+          curl -f http://localhost:3000/health || echo "Health check failed"
+
+      - name: Run simple API test
+        run: |
+          echo "Running API tests..."
+          npm test src/tests/api/test-login.api.test.ts -- --grep "should respond to health check"
+        env:
+          CI: true
+          HEADLESS: true

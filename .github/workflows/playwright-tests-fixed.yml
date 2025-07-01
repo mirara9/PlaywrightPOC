@@ -1,0 +1,159 @@
+name: Playwright Tests (Fixed)
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - api
+          - ui
+          - integration
+
+jobs:
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd test-app && npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          cd test-app && npm start &
+          sleep 10
+          curl --retry 5 --retry-delay 3 --retry-connrefused http://localhost:3000/health
+
+      - name: Run API tests
+        run: npm run test:api
+        env:
+          CI: true
+          HEADLESS: true
+
+      - name: Upload API test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-test-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd test-app && npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          cd test-app && npm start &
+          sleep 10
+          curl --retry 5 --retry-delay 3 --retry-connrefused http://localhost:3000/health
+
+      - name: Run Integration tests
+        run: npm run test:integration -- --workers=1
+        env:
+          CI: true
+          HEADLESS: true
+
+      - name: Upload Integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            test-results/
+            playwright-report/
+            screenshots/
+          retention-days: 7
+
+  basic-validation:
+    name: Basic Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Validate package.json
+        run: |
+          echo "Root package.json:"
+          npm run --dry-run test:api
+          echo "Test app package.json:"
+          cd test-app && npm run --dry-run start
+
+      - name: Install and build
+        run: |
+          npm ci
+          cd test-app && npm ci
+          npm run build
+
+      - name: Security audit
+        run: |
+          npm audit --audit-level=moderate || echo "Audit completed with warnings"
+          cd test-app && npm audit --audit-level=moderate || echo "Test app audit completed with warnings"
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [api-tests, integration-tests, basic-validation]
+    if: always()
+    steps:
+      - name: Display results
+        run: |
+          echo "## Test Results Summary"
+          echo "API Tests: ${{ needs.api-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "Basic Validation: ${{ needs.basic-validation.result }}"
+          
+          if [ "${{ needs.api-tests.result }}" = "success" ] && [ "${{ needs.integration-tests.result }}" = "success" ]; then
+            echo "✅ All tests passed!"
+            exit 0
+          else
+            echo "❌ Some tests failed"
+            exit 1
+          fi

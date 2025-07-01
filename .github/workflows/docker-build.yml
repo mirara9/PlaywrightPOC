@@ -61,7 +61,8 @@ jobs:
       - name: Test Docker image
         run: |
           # Test that the image can run basic commands
-          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name || 'pr-'}}${{ github.event.number || github.sha }} \
+          IMAGE_TAG=$(echo "${{ github.ref_name || github.sha }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             /bin/bash -c "node --version && npm --version"
 
       - name: Run tests in Docker
@@ -70,12 +71,13 @@ jobs:
           mkdir -p test-results playwright-report screenshots
           
           # Run API tests in Docker (they don't need a browser)
+          IMAGE_TAG=$(echo "${{ github.ref_name || github.sha }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker run --rm \
             -v $(pwd)/test-results:/app/test-results \
             -v $(pwd)/playwright-report:/app/playwright-report \
             -e HEADLESS=true \
             -e CI=true \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name || 'pr-'}}${{ github.event.number || github.sha }} \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             npm test src/tests/api/ || echo "API tests completed"
 
       - name: Upload Docker test results
