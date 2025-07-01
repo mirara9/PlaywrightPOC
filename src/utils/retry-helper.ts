@@ -41,8 +41,9 @@ export class RetryHelper {
       
       // For attempts < 2, just run once without retry logic
       const { chromium } = require('@playwright/test');
+      const isHeadless = process.env.HEADLESS === 'true' ? true : false;
       browser = await chromium.launch({
-        headless: process.env.HEADLESS === 'true',
+        headless: isHeadless,
         slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
       });
       
@@ -91,8 +92,9 @@ export class RetryHelper {
         // Initialize fresh browser/context/page
         if (!browser || opts.reinitializeBrowser) {
           const { chromium } = require('@playwright/test');
+          const isHeadless = process.env.HEADLESS === 'true' ? true : false;
           browser = await chromium.launch({
-            headless: process.env.HEADLESS === 'true',
+            headless: isHeadless,
             slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
           });
         }

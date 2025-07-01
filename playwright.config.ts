@@ -4,6 +4,11 @@ import { defineConfig, devices } from '@playwright/test';
 // Set to false to see browser UI, true to run headless
 const HEADLESS_MODE = process.env.HEADLESS === 'true' ? true : false;
 
+// Debug logging for headless mode
+if (process.env.NODE_ENV !== 'test') {
+  console.log(`🔧 Playwright Config: HEADLESS=${process.env.HEADLESS}, HEADLESS_MODE=${HEADLESS_MODE}`);
+}
+
 export default defineConfig({
   testDir: './src/tests',
   // Only run specific test files for main test command
@@ -33,23 +38,38 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        headless: HEADLESS_MODE,
+      },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        headless: HEADLESS_MODE,
+      },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        headless: HEADLESS_MODE,
+      },
     },
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        headless: HEADLESS_MODE,
+      },
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: { 
+        ...devices['iPhone 12'],
+        headless: HEADLESS_MODE,
+      },
     },
   ],
 

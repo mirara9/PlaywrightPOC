@@ -127,12 +127,19 @@ const HEADLESS_MODE = true;  // Always run headless
 npm test
 
 # Run tests in headless mode
+npm run test:headless
+# or
 HEADLESS=true npm test
 
 # Run specific test suites
 npm run test:api              # API tests (local server)
-npm run test:ui:selenium      # UI tests (external Selenium test page)
+npm run test:ui:selenium      # UI tests (external Selenium test page)  
 npm run test:integration      # Integration tests (API + UI combined)
+
+# Run specific test suites in headless mode
+npm run test:api:headless              # API tests headless
+npm run test:ui:selenium:headless      # UI tests headless
+npm run test:integration:headless      # Integration tests headless
 
 # Run tests with specific grep pattern
 npm test -- --grep "form"
