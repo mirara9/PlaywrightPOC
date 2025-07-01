@@ -116,4 +116,14 @@ export class TestApiWrapper extends BaseApiWrapper {
     await this.expectStatus(response, 200);
     return await this.expectJson(response);
   }
+
+  async resetData(): Promise<void> {
+    const response = await this.post('/api/reset');
+    await this.expectStatus(response, 200);
+    const data: TestApiResponse<any> = await this.expectJson(response);
+    
+    if (!data.success) {
+      throw new Error('Failed to reset data: ' + (data.message || 'Unknown error'));
+    }
+  }
 }

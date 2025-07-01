@@ -10,13 +10,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Mock users database
-const users = [
+// Original users data for reset functionality
+const originalUsers = [
     { id: 1, email: 'john.doe@example.com', password: 'SecurePass123!', name: 'John Doe', username: 'johndoe' },
     { id: 2, email: 'jane.smith@example.com', password: 'SecurePass456!', name: 'Jane Smith', username: 'janesmith' },
     { id: 3, email: 'admin@example.com', password: 'AdminPass789!', name: 'Admin User', username: 'admin' },
     { id: 4, email: 'test@example.com', password: 'password123', name: 'Test User', username: 'testuser' }
 ];
+
+// Mock users database - mutable copy
+let users = [...originalUsers];
 
 // API Routes
 app.post('/api/login', (req, res) => {
@@ -227,6 +230,18 @@ app.get('/health', (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         service: 'playwright-test-app'
+    });
+});
+
+// Reset data endpoint for testing
+app.post('/api/reset', (req, res) => {
+    users.length = 0; // Clear array
+    users.push(...originalUsers.map(user => ({ ...user }))); // Deep copy original data
+    
+    res.json({
+        success: true,
+        message: 'Data reset successfully',
+        userCount: users.length
     });
 });
 

@@ -9,6 +9,9 @@ test.describe('Users API Tests', () => {
   test.beforeEach(async ({ request }) => {
     apiWrapper = new TestApiWrapper(request);
     testData = TestDataManager.getInstance();
+    
+    // Reset data before each test to ensure isolation
+    await apiWrapper.resetData();
   });
 
   test('should get all users', async () => {
