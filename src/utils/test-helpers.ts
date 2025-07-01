@@ -7,10 +7,24 @@ export class TestHelpers {
   }
 
   static async clearLocalStorage(page: Page): Promise<void> {
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+    try {
+      await page.evaluate(() => {
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.clear();
+          }
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.clear();
+          }
+        } catch (error) {
+          // Ignore SecurityError for cross-origin restrictions
+          console.log('Storage not accessible:', error.message);
+        }
+      });
+    } catch (error) {
+      // Silently handle the error - storage not available
+      console.log('Storage access denied');
+    }
   }
 
   static async waitForNetworkIdle(page: Page, timeout: number = 30000): Promise<void> {

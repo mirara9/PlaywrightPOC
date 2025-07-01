@@ -10,9 +10,9 @@ test.describe('Test Login Page - UI Tests', () => {
     loginPage = new TestLoginPage(page);
     testData = TestDataManager.getInstance();
     
-    // Clear any existing session
-    await loginPage.clearSession();
+    // Navigate first, then clear session
     await loginPage.navigateToLogin();
+    await loginPage.clearSession();
   });
 
   test.describe('Page Layout and Elements', () => {

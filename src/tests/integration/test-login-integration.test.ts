@@ -12,8 +12,8 @@ test.describe('Login Integration Tests - UI + API', () => {
     testData = TestDataManager.getInstance();
     baseURL = 'http://localhost:3000';
     
-    await loginPage.clearSession();
     await loginPage.navigateToLogin();
+    await loginPage.clearSession();
   });
 
   test.describe('End-to-End Login Flow', () => {
