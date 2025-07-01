@@ -6,6 +6,12 @@ const HEADLESS_MODE = process.env.HEADLESS === 'true' ? true : false;
 
 export default defineConfig({
   testDir: './src/tests',
+  // Only run specific test files for main test command
+  testMatch: [
+    'src/tests/api/**/*.test.ts',                           // API tests (uses local server)
+    'src/tests/ui/selenium-test-form.ui.test.ts',           // New UI tests (external site)
+    'src/tests/integration/api-ui-integration.test.ts'      // New integration tests
+  ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   // Enhanced retry configuration

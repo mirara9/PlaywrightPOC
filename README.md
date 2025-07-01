@@ -123,20 +123,45 @@ const HEADLESS_MODE = true;  // Always run headless
 
 #### Test Commands
 ```bash
-# Run all tests (with browser UI visible by default)
+# Run all tests (API + UI + Integration)
 npm test
 
 # Run tests in headless mode
 HEADLESS=true npm test
 
-# Run specific test suite
-npm test src/tests/api/
-npm test src/tests/ui/
-npm test src/tests/integration/
+# Run specific test suites
+npm run test:api              # API tests (local server)
+npm run test:ui:selenium      # UI tests (external Selenium test page)
+npm run test:integration      # Integration tests (API + UI combined)
 
 # Run tests with specific grep pattern
-npm test -- --grep "login"
+npm test -- --grep "form"
 ```
+
+## 🎯 **Test Structure**
+
+### **API Tests** (`npm run test:api`)
+Tests the local test app server at `http://localhost:3000`:
+- User CRUD operations
+- Authentication workflows  
+- Data validation and error handling
+- Response format validation
+
+### **UI Tests** (`npm run test:ui:selenium`)
+Tests the external Selenium test form at `https://automationintesting.com/selenium/testpage/`:
+- Form element interactions (inputs, dropdowns, checkboxes, radio buttons)
+- Form validation and submission
+- Cross-browser compatibility
+- Realistic user workflows
+
+### **Integration Tests** (`npm run test:integration`) 
+Combines API and UI testing for realistic workflows:
+- Create users via API, use data in UI forms
+- End-to-end user journey testing
+- Data consistency validation between API and UI
+- Error handling across both layers
+
+For detailed information about the new test structure, see [NEW-TEST-STRUCTURE.md](./NEW-TEST-STRUCTURE.md).
 
 ## 🔄 NUnit-Style Retry Functionality
 
