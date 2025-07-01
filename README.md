@@ -223,6 +223,156 @@ xhost +local:docker
 xhost -local:docker
 ```
 
+## GitHub Actions Integration
+
+### Automated CI/CD Pipeline
+
+The framework includes comprehensive GitHub Actions workflows for automated testing and deployment:
+
+#### 🔄 **Main Test Workflow** (`.github/workflows/playwright-tests.yml`)
+- **Triggers**: Push to main/develop, Pull Requests, Manual dispatch
+- **Jobs**: API tests, UI tests, Integration tests, Docker tests
+- **Features**: Parallel execution, artifact uploads, test reports
+- **Manual Control**: Choose test suite (all/api/ui/integration) and headless mode
+
+```bash
+# Workflow runs automatically on:
+git push origin main
+git push origin develop
+
+# Manual trigger with options:
+# 1. Go to Actions tab in GitHub
+# 2. Select "Playwright Tests" workflow  
+# 3. Click "Run workflow"
+# 4. Choose test suite and headless mode
+```
+
+#### 🐳 **Docker Build Workflow** (`.github/workflows/docker-build.yml`)
+- **Purpose**: Build and test Docker images
+- **Registry**: GitHub Container Registry (ghcr.io)
+- **Security**: Trivy vulnerability scanning
+- **Triggers**: Push to main/develop, tags, manual dispatch
+
+#### 📦 **Dependency Updates** (`.github/workflows/dependency-update.yml`)
+- **Schedule**: Weekly on Mondays at 9 AM UTC
+- **Scope**: npm packages, Playwright browsers, security fixes
+- **Automation**: Creates PRs with updated dependencies
+- **Safety**: Runs API tests before creating PR
+
+#### 🚀 **Release Workflow** (`.github/workflows/release.yml`)
+- **Triggers**: Git tags (v*), manual dispatch
+- **Features**: Full test suite, Docker images, GitHub releases, npm publishing
+- **Artifacts**: Deployment packages, changelogs, Docker images
+
+### Workflow Status Badges
+
+Add these badges to your fork's README:
+
+```markdown
+![Tests](https://github.com/YOUR_USERNAME/PlaywrightPOC/workflows/Playwright%20Tests/badge.svg)
+![Docker](https://github.com/YOUR_USERNAME/PlaywrightPOC/workflows/Docker%20Build%20&%20Test/badge.svg)
+![Release](https://github.com/YOUR_USERNAME/PlaywrightPOC/workflows/Release/badge.svg)
+```
+
+### Using in Your Projects
+
+#### 1. **Fork Integration**
+```bash
+# Fork the repository
+gh repo fork mirara9/PlaywrightPOC
+
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/PlaywrightPOC.git
+
+# GitHub Actions will automatically run on your fork
+```
+
+#### 2. **Custom Configuration**
+Create `.github/workflows/custom-tests.yml`:
+```yaml
+name: Custom Tests
+on:
+  push:
+    branches: [ main ]
+jobs:
+  custom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci && cd test-app && npm ci
+      - run: npx playwright install --with-deps
+      - run: cd test-app && npm start &
+      - run: npm test src/tests/api/
+```
+
+#### 3. **Environment Variables**
+Set these in GitHub repository settings → Secrets and variables → Actions:
+
+```bash
+# Optional secrets:
+NPM_TOKEN          # For npm publishing
+SLACK_WEBHOOK      # For notifications
+CUSTOM_API_KEY     # For external integrations
+```
+
+#### 4. **Manual Test Execution**
+```bash
+# Run specific test suites manually:
+# 1. Go to Actions tab
+# 2. Select "Playwright Tests"
+# 3. Click "Run workflow"
+# 4. Choose options:
+#    - Test suite: all/api/ui/integration
+#    - Headless mode: true/false
+```
+
+### Docker Image Usage
+
+GitHub Actions automatically builds and publishes Docker images:
+
+```bash
+# Pull latest image
+docker pull ghcr.io/mirara9/playwrightpoc:latest
+
+# Run tests
+docker run --rm ghcr.io/mirara9/playwrightpoc:latest npm test
+
+# Use in your CI
+docker run --rm \
+  -v $(pwd)/test-results:/app/test-results \
+  ghcr.io/mirara9/playwrightpoc:latest \
+  npm test src/tests/api/
+```
+
+### Advanced Features
+
+#### **Dependabot Integration**
+- Automated dependency updates via `.github/dependabot.yml`
+- Weekly updates for npm, Docker, and GitHub Actions
+- Automatic PR creation with test validation
+
+#### **Security Scanning**
+- Trivy vulnerability scanning for Docker images
+- npm audit for dependency vulnerabilities
+- SARIF reports uploaded to GitHub Security tab
+
+#### **Release Automation**
+```bash
+# Create a release
+git tag v1.0.0
+git push origin v1.0.0
+
+# This triggers:
+# 1. Full test suite
+# 2. Docker image build and push
+# 3. GitHub release creation
+# 4. npm package publishing (if configured)
+# 5. Deployment artifact creation
+```
+
 ### Creating API Wrappers
 
 Extend the `BaseApiWrapper` class to create your API wrappers:
