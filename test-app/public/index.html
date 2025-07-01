@@ -233,13 +233,7 @@
     </div>
 
     <script>
-        // Mock user database
-        const users = [
-            { email: 'john.doe@example.com', password: 'SecurePass123!', name: 'John Doe' },
-            { email: 'jane.smith@example.com', password: 'SecurePass456!', name: 'Jane Smith' },
-            { email: 'admin@example.com', password: 'AdminPass789!', name: 'Admin User' },
-            { email: 'test@example.com', password: 'password123', name: 'Test User' }
-        ];
+        // Note: Authentication now handled by server API at /api/login
 
         // DOM elements
         const loginForm = document.getElementById('loginFormElement');
@@ -293,8 +287,16 @@
             return emailRegex.test(email);
         }
 
+        // Legacy function for testing compatibility
         function authenticateUser(email, password) {
-            return users.find(user => user.email === email && user.password === password);
+            // This function is kept for test compatibility but actual auth is via API
+            const mockUsers = [
+                { email: 'john.doe@example.com', password: 'SecurePass123!', name: 'John Doe' },
+                { email: 'jane.smith@example.com', password: 'SecurePass456!', name: 'Jane Smith' },
+                { email: 'admin@example.com', password: 'AdminPass789!', name: 'Admin User' },
+                { email: 'test@example.com', password: 'password123', name: 'Test User' }
+            ];
+            return mockUsers.find(user => user.email === email && user.password === password);
         }
 
         function showDashboard(user) {
@@ -352,23 +354,36 @@
             // Show loading state
             setLoading(true);
 
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            try {
+                // Make API call to login endpoint
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
 
-            // Authenticate user
-            const user = authenticateUser(email, password);
-            
-            setLoading(false);
+                const data = await response.json();
+                setLoading(false);
 
-            if (user) {
-                showSuccess('Login successful! Redirecting...');
-                
-                // Delay before showing dashboard
-                setTimeout(() => {
-                    showDashboard(user);
-                }, 1000);
-            } else {
-                showError('Invalid credentials. Please try again.');
+                if (response.ok && data.success) {
+                    showSuccess('Login successful! Redirecting...');
+                    
+                    // Delay before showing dashboard
+                    setTimeout(() => {
+                        showDashboard(data.user);
+                    }, 1000);
+                } else {
+                    showError(data.message || 'Invalid credentials. Please try again.');
+                }
+            } catch (error) {
+                setLoading(false);
+                console.error('Login error:', error);
+                showError('Network error. Please try again.');
             }
         });
 
@@ -395,8 +410,7 @@
             authenticateUser,
             validateEmail,
             showError,
-            showSuccess,
-            users
+            showSuccess
         };
     </script>
 </body>

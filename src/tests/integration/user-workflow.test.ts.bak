@@ -1,18 +1,20 @@
 import { test, expect } from '@playwright/test';
-import { ExampleApiWrapper, ExampleHomePage, ExampleLoginPage } from '../../index';
+import { TestApiWrapper } from '../../wrappers/api';
+import { TestLoginPage } from '../../wrappers/ui';
 import { TestDataManager, TestHelpers } from '../../utils';
 
 test.describe('User Workflow Integration Tests', () => {
-  let apiWrapper: ExampleApiWrapper;
-  let homePage: ExampleHomePage;
-  let loginPage: ExampleLoginPage;
+  let apiWrapper: TestApiWrapper;
+  let loginPage: TestLoginPage;
   let testData: TestDataManager;
 
   test.beforeEach(async ({ page, request }) => {
-    apiWrapper = new ExampleApiWrapper(request);
-    homePage = new ExampleHomePage(page);
-    loginPage = new ExampleLoginPage(page);
+    apiWrapper = new TestApiWrapper(request);
+    loginPage = new TestLoginPage(page);
     testData = TestDataManager.getInstance();
+    
+    // Reset server data for test isolation
+    await apiWrapper.resetData();
     
     await TestHelpers.clearLocalStorage(page);
   });
@@ -23,17 +25,19 @@ test.describe('User Workflow Integration Tests', () => {
     const createdUser = await apiWrapper.createUser({
       name: newUser.name,
       email: newUser.email,
-      username: newUser.username
+      username: newUser.username,
+      password: newUser.password
     });
     
     expect(createdUser).toBeDefined();
     expect(createdUser.email).toBe(newUser.email);
     
-    await loginPage.navigate();
-    await loginPage.login(newUser.email, newUser.password);
+    await loginPage.navigateToLogin();
+    await loginPage.loginAndWaitForSuccess(newUser.email, newUser.password);
     
-    await homePage.waitForUrl(/.*\/dashboard.*/);
-    expect(await homePage.isLoggedIn()).toBeTruthy();
+    // Verify login success by checking user profile is visible
+    await loginPage.expectUserProfileVisible();
+    await loginPage.expectUserName(createdUser.name);
   });
 
   test('should verify user data consistency between API and UI', async ({ page }) => {
@@ -41,12 +45,16 @@ test.describe('User Workflow Integration Tests', () => {
     const userFromApi = await apiWrapper.getUserById(userId);
     
     const user = testData.getUser('regular');
-    await loginPage.navigate();
-    await loginPage.login(user.email, user.password);
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await loginPage.navigateToLogin();
+    await loginPage.loginAndWaitForSuccess(user.email, user.password);
     
-    const userProfileText = await page.locator('[data-testid="user-profile-name"]').textContent();
-    expect(userProfileText).toContain(userFromApi.name);
+    // Verify the displayed user name matches API data
+    await loginPage.expectUserName(userFromApi.name);
+    
+    // Also verify session data consistency
+    const sessionUser = await loginPage.getSessionUser();
+    expect(sessionUser.name).toBe(userFromApi.name);
+    expect(sessionUser.email).toBe(userFromApi.email);
   });
 
   test('should update user via API and verify changes in UI', async ({ page }) => {
