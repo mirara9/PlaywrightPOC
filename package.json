@@ -17,7 +17,18 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write src/**/*.ts",
     "clean": "rm -rf dist",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "docker:build": "./build.sh",
+    "docker:test": "./docker-run.sh test",
+    "docker:test:api": "./docker-run.sh test-api",
+    "docker:test:ui": "./docker-run.sh test-ui --ui",
+    "docker:test:integration": "./docker-run.sh test-integration",
+    "docker:shell": "./docker-run.sh shell",
+    "docker:clean": "./docker-run.sh clean",
+    "docker:report": "./docker-run.sh report",
+    "setup:all": "./build.sh --local",
+    "setup:docker": "./build.sh",
+    "setup:local": "./build.sh --local --skip-docker"
   },
   "keywords": [
     "playwright",

@@ -102,6 +102,127 @@ npm test src/tests/integration/
 npm test -- --grep "login"
 ```
 
+## Docker Setup
+
+### Quick Start with Docker
+
+1. **Build and setup everything:**
+   ```bash
+   ./build.sh
+   ```
+
+2. **Run tests in Docker:**
+   ```bash
+   ./docker-run.sh test
+   ```
+
+### Docker Commands
+
+#### Setup and Build
+```bash
+# Build Docker image and install all dependencies
+./build.sh
+
+# Install dependencies locally AND build Docker image
+./build.sh --local
+
+# Install only local dependencies (skip Docker)
+./build.sh --local --skip-docker
+```
+
+#### Running Tests
+```bash
+# Run all tests in headless mode
+./docker-run.sh test
+
+# Run tests with visible browser UI (requires X11 forwarding)
+./docker-run.sh test --ui
+
+# Run specific test suites
+./docker-run.sh test-api           # API tests only
+./docker-run.sh test-ui            # UI tests only  
+./docker-run.sh test-integration   # Integration tests only
+
+# Run tests with grep pattern
+./docker-run.sh test --grep "login"
+```
+
+#### Development and Debugging
+```bash
+# Open bash shell in container
+./docker-run.sh shell
+
+# View test reports
+./docker-run.sh report
+
+# View container logs
+./docker-run.sh logs
+
+# Clean up containers and volumes
+./docker-run.sh clean
+```
+
+#### NPM Scripts (Alternative)
+```bash
+# Setup scripts
+npm run setup:all          # Install locally + build Docker
+npm run setup:docker       # Build Docker image only
+npm run setup:local        # Install locally only
+
+# Docker test scripts
+npm run docker:test         # Run all tests
+npm run docker:test:api     # Run API tests
+npm run docker:test:ui      # Run UI tests with visible browser
+npm run docker:test:integration # Run integration tests
+
+# Docker utility scripts
+npm run docker:shell        # Open container shell
+npm run docker:clean        # Clean up Docker resources
+npm run docker:report       # View test reports
+```
+
+### Docker Compose (Advanced)
+
+```bash
+# Run tests in headless mode
+docker-compose up
+
+# Run tests with UI (requires X11 forwarding setup)
+docker-compose --profile ui-tests up
+
+# Development mode with file watching
+docker-compose --profile development up
+
+# Clean up
+docker-compose down -v
+```
+
+### Docker Configuration
+
+The Docker setup includes:
+
+- **Multi-stage builds** for optimized image size
+- **Pre-installed Playwright browsers** and system dependencies
+- **Volume mounts** for test results, reports, and screenshots
+- **Environment variable support** for headless/UI modes
+- **Health checks** to ensure containers are ready
+- **Network isolation** for test consistency
+
+### X11 Forwarding for UI Tests
+
+To run tests with visible browser UI on Linux:
+
+```bash
+# Allow X11 forwarding
+xhost +local:docker
+
+# Run UI tests
+./docker-run.sh test --ui
+
+# Restore X11 security
+xhost -local:docker
+```
+
 ### Creating API Wrappers
 
 Extend the `BaseApiWrapper` class to create your API wrappers:

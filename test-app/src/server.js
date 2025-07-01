@@ -144,6 +144,15 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Health check endpoint for Docker
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        service: 'playwright-test-app'
+    });
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({

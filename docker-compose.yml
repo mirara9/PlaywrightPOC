@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  playwright-tests:
+    build: .
+    container_name: playwright-test-framework
+    environment:
+      - NODE_ENV=test
+      - HEADLESS=true
+      - CI=true
+      - BASE_URL=http://localhost:3000
+    volumes:
+      # Mount test results and reports for access from host
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+      - ./screenshots:/app/screenshots
+    ports:
+      - "3000:3000"
+      - "9323:9323"  # Playwright HTML report server
+    networks:
+      - playwright-network
+    command: npm test
+
+  # Service for running tests with visible UI (when needed)
+  playwright-ui:
+    build: .
+    container_name: playwright-test-framework-ui
+    environment:
+      - NODE_ENV=test
+      - HEADLESS=false
+      - CI=false
+      - BASE_URL=http://localhost:3000
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+      - ./screenshots:/app/screenshots
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    ports:
+      - "3001:3000"
+      - "9324:9323"
+    networks:
+      - playwright-network
+    profiles:
+      - ui-tests
+    command: npm test
+
+  # Service for development with file watching
+  playwright-dev:
+    build: .
+    container_name: playwright-test-framework-dev
+    environment:
+      - NODE_ENV=development
+      - HEADLESS=false
+      - CI=false
+      - BASE_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/test-app/node_modules
+    ports:
+      - "3002:3000"
+      - "9325:9323"
+    networks:
+      - playwright-network
+    profiles:
+      - development
+    command: /bin/bash
+
+networks:
+  playwright-network:
+    driver: bridge
