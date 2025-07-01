@@ -20,10 +20,10 @@ test.describe('Test Login Page - UI Tests', () => {
       await loginPage.expectLoginFormVisible();
       
       // Check that all form elements are present
-      await expect(loginPage['emailInput']).toBeVisible();
-      await expect(loginPage['passwordInput']).toBeVisible();
-      await expect(loginPage['loginButton']).toBeVisible();
-      await expect(loginPage['forgotPasswordLink']).toBeVisible();
+      await expect(loginPage.emailInputLocator).toBeVisible();
+      await expect(loginPage.passwordInputLocator).toBeVisible();
+      await expect(loginPage.loginButtonLocator).toBeVisible();
+      await expect(loginPage.forgotPasswordLinkLocator).toBeVisible();
     });
 
     test('should have correct page title', async () => {
@@ -31,16 +31,16 @@ test.describe('Test Login Page - UI Tests', () => {
     });
 
     test('should have proper input placeholders', async () => {
-      const emailPlaceholder = await loginPage['emailInput'].getAttribute('placeholder');
-      const passwordPlaceholder = await loginPage['passwordInput'].getAttribute('placeholder');
+      const emailPlaceholder = await loginPage.emailInputLocator.getAttribute('placeholder');
+      const passwordPlaceholder = await loginPage.passwordInputLocator.getAttribute('placeholder');
       
       expect(emailPlaceholder).toBe('Enter your email');
       expect(passwordPlaceholder).toBe('Enter your password');
     });
 
     test('should have proper input types', async () => {
-      const emailType = await loginPage['emailInput'].getAttribute('type');
-      const passwordType = await loginPage['passwordInput'].getAttribute('type');
+      const emailType = await loginPage.emailInputLocator.getAttribute('type');
+      const passwordType = await loginPage.passwordInputLocator.getAttribute('type');
       
       expect(emailType).toBe('email');
       expect(passwordType).toBe('password');
@@ -342,8 +342,8 @@ test.describe('Test Login Page - UI Tests', () => {
     });
 
     test('should have required attributes on inputs', async () => {
-      const emailRequired = await loginPage['emailInput'].getAttribute('required');
-      const passwordRequired = await loginPage['passwordInput'].getAttribute('required');
+      const emailRequired = await loginPage.emailInputLocator.getAttribute('required');
+      const passwordRequired = await loginPage.passwordInputLocator.getAttribute('required');
       
       expect(emailRequired).toBe('');
       expect(passwordRequired).toBe('');

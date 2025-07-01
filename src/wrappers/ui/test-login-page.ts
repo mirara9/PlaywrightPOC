@@ -330,4 +330,21 @@ export class TestLoginPage extends BasePage {
       });
     });
   }
+
+  // Public getter methods for test access
+  get emailInputLocator(): Locator {
+    return this.emailInput;
+  }
+
+  get passwordInputLocator(): Locator {
+    return this.passwordInput;
+  }
+
+  get loginButtonLocator(): Locator {
+    return this.loginButton;
+  }
+
+  get forgotPasswordLinkLocator(): Locator {
+    return this.forgotPasswordLink;
+  }
 }
