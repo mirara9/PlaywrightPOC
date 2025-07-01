@@ -7,7 +7,7 @@ export interface PageConfig {
 }
 
 export abstract class BasePage {
-  protected page: Page;
+  public page: Page;
   protected context: BrowserContext;
   protected config: PageConfig;
   public readonly url: string;
@@ -94,7 +94,7 @@ export abstract class BasePage {
     await this.page.waitForURL(url, { timeout: timeout || this.config.timeout });
   }
 
-  protected async screenshot(name: string, options?: { fullPage?: boolean }): Promise<void> {
+  async screenshot(name: string, options?: { fullPage?: boolean }): Promise<void> {
     await this.page.screenshot({ 
       path: `screenshots/${name}.png`, 
       fullPage: options?.fullPage || false 
