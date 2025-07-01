@@ -56,6 +56,52 @@ playwright-test-framework/
 
 ## Usage
 
+### Running Tests
+
+#### Headless Mode Configuration
+
+You can control whether tests run with visible browser UI or in headless mode:
+
+**Method 1: Environment Variable**
+```bash
+# Run tests in headless mode (no browser UI)
+HEADLESS=true npm test
+
+# Run tests with visible browser UI (default)
+HEADLESS=false npm test
+# or simply
+npm test
+```
+
+**Method 2: Edit Configuration File**
+Edit `playwright.config.ts` and change the HEADLESS_MODE constant:
+```typescript
+// Set to false to see browser UI, true to run headless
+const HEADLESS_MODE = process.env.HEADLESS === 'true' ? true : false;
+
+// Or force a specific mode by changing to:
+const HEADLESS_MODE = false; // Always show browser UI
+// or
+const HEADLESS_MODE = true;  // Always run headless
+```
+
+#### Test Commands
+```bash
+# Run all tests (with browser UI visible by default)
+npm test
+
+# Run tests in headless mode
+HEADLESS=true npm test
+
+# Run specific test suite
+npm test src/tests/api/
+npm test src/tests/ui/
+npm test src/tests/integration/
+
+# Run tests with specific grep pattern
+npm test -- --grep "login"
+```
+
 ### Creating API Wrappers
 
 Extend the `BaseApiWrapper` class to create your API wrappers:

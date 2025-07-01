@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Configuration flag for headless mode
+// Set to false to see browser UI, true to run headless
+const HEADLESS_MODE = process.env.HEADLESS === 'true' ? true : false;
+
 export default defineConfig({
   testDir: './src/tests',
   fullyParallel: true,
@@ -11,6 +15,7 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    headless: HEADLESS_MODE,
   },
 
   projects: [
