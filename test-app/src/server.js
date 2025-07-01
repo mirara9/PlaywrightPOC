@@ -8,6 +8,13 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Add request logging for debugging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Original users data for reset functionality
@@ -205,29 +212,6 @@ app.delete('/api/users/:id', (req, res) => {
     });
 });
 
-// Serve the main page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        service: 'playwright-test-app'
-    });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-    });
-});
-
 // Reset data endpoint for testing
 app.post('/api/reset', (req, res) => {
     users.length = 0; // Clear array
@@ -240,8 +224,81 @@ app.post('/api/reset', (req, res) => {
     });
 });
 
-// 404 handler
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        service: 'playwright-test-app'
+    });
+});
+
+// Alternative debug route
+app.get('/debug', (req, res) => {
+    const fs = require('fs');
+    const filePath = path.join(__dirname, '../public/index.html');
+    const publicDir = path.join(__dirname, '../public');
+    
+    res.json({
+        server: 'working',
+        timestamp: new Date().toISOString(),
+        serverFile: __filename,
+        publicDir: publicDir,
+        indexPath: filePath,
+        indexExists: fs.existsSync(filePath),
+        publicDirExists: fs.existsSync(publicDir),
+        publicContents: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : 'not found'
+    });
+});
+
+// Serve the main page - MUST be after API routes
+app.get('/', (req, res) => {
+    console.log('=== ROOT ROUTE HANDLER CALLED ===');
+    console.log('Request headers:', req.headers);
+    
+    const filePath = path.join(__dirname, '../public/index.html');
+    console.log('Attempting to serve file:', filePath);
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+        console.error('❌ index.html not found at:', filePath);
+        return res.status(404).json({
+            success: false,
+            message: 'Login page not found',
+            attempted_path: filePath
+        });
+    }
+    
+    console.log('✅ File exists, sending...');
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('❌ Error sending file:', err);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    success: false,
+                    message: 'Error serving login page',
+                    error: err.message
+                });
+            }
+        } else {
+            console.log('✅ File sent successfully');
+        }
+    });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+    });
+});
+
+// 404 handler - MUST be last
 app.use((req, res) => {
+    console.log('404 handler triggered for:', req.method, req.url);
     res.status(404).json({
         success: false,
         message: 'Route not found'
