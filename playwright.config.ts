@@ -8,14 +8,20 @@ export default defineConfig({
   testDir: './src/tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // Enhanced retry configuration
+  retries: process.env.RETRY_COUNT ? parseInt(process.env.RETRY_COUNT) : 3,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
     headless: HEADLESS_MODE,
+    // Force browser restart between retries
+    launchOptions: {
+      slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
+    },
   },
 
   projects: [

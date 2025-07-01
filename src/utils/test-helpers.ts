@@ -18,7 +18,7 @@ export class TestHelpers {
           }
         } catch (error) {
           // Ignore SecurityError for cross-origin restrictions
-          console.log('Storage not accessible:', error.message);
+          console.log('Storage not accessible:', (error as Error).message);
         }
       });
     } catch (error) {
@@ -146,5 +146,62 @@ export class TestHelpers {
         await dialog.dismiss();
       }
     });
+  }
+
+  /**
+   * Resets test data by calling the API reset endpoint
+   */
+  static async resetTestData(baseUrl: string = 'http://localhost:3000'): Promise<void> {
+    try {
+      const response = await fetch(`${baseUrl}/api/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to reset test data:', response.statusText);
+      } else {
+        const result = await response.json();
+        console.log('Test data reset:', result.message);
+      }
+    } catch (error) {
+      console.warn('Error resetting test data:', (error as Error).message);
+    }
+  }
+
+  /**
+   * Clears all browser storage (localStorage, sessionStorage, cookies)
+   */
+  static async clearBrowserStorage(page: Page): Promise<void> {
+    try {
+      // Clear local and session storage
+      await this.clearLocalStorage(page);
+      
+      // Clear cookies through context
+      const context = page.context();
+      await this.clearStorage(context);
+      
+      // Clear IndexedDB and WebSQL if available
+      await page.evaluate(() => {
+        try {
+          // Clear IndexedDB
+          if ('indexedDB' in window) {
+            indexedDB.databases().then(databases => {
+              databases.forEach(db => {
+                if (db.name) {
+                  indexedDB.deleteDatabase(db.name);
+                }
+              });
+            }).catch(() => {});
+          }
+        } catch (error) {
+          // Ignore errors
+        }
+      });
+    } catch (error) {
+      console.warn('Error clearing browser storage:', (error as Error).message);
+    }
   }
 }

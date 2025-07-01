@@ -257,7 +257,7 @@ export class TestLoginPage extends BasePage {
           }
         } catch (error) {
           // Ignore SecurityError for cross-origin restrictions
-          console.log('Session storage not accessible:', error.message);
+          console.log('Session storage not accessible:', (error as Error).message);
         }
       });
     } catch (error) {
@@ -275,7 +275,7 @@ export class TestLoginPage extends BasePage {
           }
         } catch (error) {
           // Ignore SecurityError for cross-origin restrictions
-          console.log('Session storage not accessible:', error.message);
+          console.log('Session storage not accessible:', (error as Error).message);
         }
       }, user);
     } catch (error) {
@@ -295,7 +295,7 @@ export class TestLoginPage extends BasePage {
           return null;
         } catch (error) {
           // Ignore SecurityError for cross-origin restrictions
-          console.log('Session storage not accessible:', error.message);
+          console.log('Session storage not accessible:', (error as Error).message);
           return null;
         }
       });
@@ -346,5 +346,21 @@ export class TestLoginPage extends BasePage {
 
   get forgotPasswordLinkLocator(): Locator {
     return this.forgotPasswordLink;
+  }
+
+  get errorMessageLocator(): Locator {
+    return this.errorMessage;
+  }
+
+  get successMessageLocator(): Locator {
+    return this.successMessage;
+  }
+
+  get userProfileLocator(): Locator {
+    return this.userProfile;
+  }
+
+  get logoutButtonLocator(): Locator {
+    return this.logoutButton;
   }
 }

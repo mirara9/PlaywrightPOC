@@ -209,11 +209,11 @@ test.describe('Google Search Tests', () => {
     
     expect(containsApple).toBeTruthy();
     
-    // Return the result as test output
-    return {
+    // Log the result for test output
+    console.log('Search result:', {
       searchQuery: 'apple',
       firstResult: firstResult,
       timestamp: new Date().toISOString()
-    };
+    });
   });
 });
