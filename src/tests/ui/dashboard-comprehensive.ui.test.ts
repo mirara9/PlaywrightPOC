@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 const TEST_APP_URL = process.env.TEST_APP_URL || 'http://localhost:3000';
 
 test.describe('Dashboard Comprehensive UI Tests', () => {
-    // Setup: Login before each test
+    // Setup: Login before each test and navigate to dashboard
     test.beforeEach(async ({ page }) => {
         await page.goto(TEST_APP_URL);
         
@@ -13,8 +13,11 @@ test.describe('Dashboard Comprehensive UI Tests', () => {
         await page.fill('[data-testid="password-input"]', 'password123');
         await page.click('[data-testid="login-submit"]');
         
-        // Wait for dashboard to load
-        await page.waitForURL('**/dashboard');
+        // Wait for redirect to Sitecore Launchpad
+        await page.waitForURL('**/sitecore-launchpad');
+        
+        // Navigate to the old dashboard for these tests
+        await page.goto(`${TEST_APP_URL}/dashboard`);
         await page.waitForSelector('[data-testid="overview-section"]');
     });
 
@@ -667,7 +670,9 @@ test.describe('Dashboard Comprehensive UI Tests', () => {
         await page.fill('[data-testid="password-input"]', 'password123');
         await page.click('[data-testid="login-submit"]');
         
-        // Wait for dashboard
+        // Wait for redirect to Sitecore Launchpad then navigate to dashboard
+        await page.waitForURL('**/sitecore-launchpad');
+        await page.goto(`${TEST_APP_URL}/dashboard`);
         await page.waitForSelector('[data-testid="overview-section"]');
         
         const loadTime = Date.now() - startTime;
@@ -887,6 +892,10 @@ test.describe('Dashboard Comprehensive UI Tests', () => {
         await page.fill('[data-testid="email-input"]', 'test@example.com');
         await page.fill('[data-testid="password-input"]', 'password123');
         await page.click('[data-testid="login-submit"]');
+        
+        // Wait for redirect to Sitecore Launchpad then navigate to dashboard
+        await page.waitForURL('**/sitecore-launchpad');
+        await page.goto(`${TEST_APP_URL}/dashboard`);
         await page.waitForSelector('[data-testid="overview-section"]');
         
         // 2. View dashboard overview

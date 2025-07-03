@@ -27,7 +27,7 @@ test.describe('Login UI Tests', () => {
     await loginPage.navigate();
     await loginPage.login(user.email, user.password);
     
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await homePage.waitForUrl(/.*\/sitecore-launchpad.*/);
     expect(await homePage.isLoggedIn()).toBeTruthy();
   });
 
@@ -62,10 +62,10 @@ test.describe('Login UI Tests', () => {
     
     await loginPage.navigate();
     await loginPage.login(user.email, user.password);
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await homePage.waitForUrl(/.*\/sitecore-launchpad.*/);
     
     await loginPage.navigate();
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await homePage.waitForUrl(/.*\/sitecore-launchpad.*/);
   });
 
   test('should maintain session after page refresh', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('Login UI Tests', () => {
     
     await loginPage.navigate();
     await loginPage.login(user.email, user.password);
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await homePage.waitForUrl(/.*\/sitecore-launchpad.*/);
     
     await page.reload();
     await TestHelpers.waitForNetworkIdle(page);
@@ -109,7 +109,7 @@ test.describe('Login UI Tests', () => {
     
     await loginPage.navigate();
     await loginPage.login(user.email, user.password);
-    await homePage.waitForUrl(/.*\/dashboard.*/);
+    await homePage.waitForUrl(/.*\/sitecore-launchpad.*/);
     
     const cookies = await context.cookies();
     const rememberCookie = cookies.find(cookie => cookie.name === 'remember_user');
