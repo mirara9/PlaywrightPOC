@@ -251,6 +251,35 @@ app.get('/debug', (req, res) => {
     });
 });
 
+// Serve specific pages - MUST be after API routes
+app.get('/sitecore-launchpad', (req, res) => {
+    const filePath = path.join(__dirname, '../public/sitecore-launchpad.html');
+    const fs = require('fs');
+    
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+            success: false,
+            message: 'Sitecore Launchpad page not found'
+        });
+    }
+    
+    res.sendFile(filePath);
+});
+
+app.get('/dashboard', (req, res) => {
+    const filePath = path.join(__dirname, '../public/dashboard.html');
+    const fs = require('fs');
+    
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+            success: false,
+            message: 'Dashboard page not found'
+        });
+    }
+    
+    res.sendFile(filePath);
+});
+
 // Serve the main page - MUST be after API routes
 app.get('/', (req, res) => {
     console.log('=== ROOT ROUTE HANDLER CALLED ===');
