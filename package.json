@@ -76,7 +76,11 @@
     "install:all": "npm install && npm run install:test-app && npm run setup:playwright",
     "install:windows": "node scripts/windows-install.js",
     "install:windows:clean": "node scripts/windows-install.js --clean",
-    "install:windows:quick": "node scripts/windows-install.js --skip-playwright"
+    "install:windows:quick": "node scripts/windows-install.js --skip-playwright",
+    "start:test-app": "node start-test-app.js",
+    "start:test-app:enhanced": "node start-test-app.js --enhanced",
+    "start:test-app:basic": "node start-test-app.js --basic",
+    "start:test-app:port": "node start-test-app.js --port"
   },
   "keywords": [
     "playwright",
