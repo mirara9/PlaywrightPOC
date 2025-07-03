@@ -131,8 +131,6 @@ test.describe('Dashboard Comprehensive UI Tests', () => {
         
         // Click outside to close
         await page.click('body');
-        // Wait for the dropdown to close (may have animation)
-        await page.waitForTimeout(500);
         await expect(notificationsDropdown).not.toHaveClass(/show/);
     });
 

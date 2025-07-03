@@ -65,8 +65,21 @@ class DashboardApp {
         });
 
         // Notifications
-        document.getElementById('notificationsBtn').addEventListener('click', () => {
+        document.getElementById('notificationsBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
             this.toggleNotifications();
+        });
+
+        // Click outside to close notifications dropdown
+        document.addEventListener('click', (e) => {
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            const notificationsBtn = document.getElementById('notificationsBtn');
+            
+            if (notificationsDropdown && notificationsDropdown.classList.contains('show')) {
+                if (!notificationsBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                    notificationsDropdown.classList.remove('show');
+                }
+            }
         });
 
         // Modal close buttons
