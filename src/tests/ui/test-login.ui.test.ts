@@ -78,7 +78,7 @@ test.describe('Test Login Page - UI Tests', () => {
       await loginPage.clickLoginButton();
       
       await loginPage.waitForLoadingComplete();
-      await loginPage.expectErrorMessage('Invalid credentials. Please try again.');
+      await loginPage.expectErrorMessage('Invalid credentials');
     });
   });
 

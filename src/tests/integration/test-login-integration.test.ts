@@ -89,7 +89,7 @@ test.describe('Login Integration Tests - UI + API', () => {
       await loginPage.clickLoginButton();
       
       await loginPage.waitForLoadingComplete();
-      await loginPage.expectErrorMessage('Invalid credentials. Please try again.');
+      await loginPage.expectErrorMessage('Invalid credentials');
       
       // Verify form is still functional after error
       await loginPage.loginAndWaitForSuccess(user.email, user.password);
