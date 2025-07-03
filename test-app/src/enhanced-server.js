@@ -761,16 +761,20 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Sitecore Launchpad route
+app.get('/sitecore-launchpad', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/sitecore-launchpad.html'));
+});
+
 // Serve the enhanced dashboard
 app.get('/dashboard', (req, res) => {
     const filePath = path.join(__dirname, '../public/dashboard.html');
     res.sendFile(filePath);
 });
 
-// Serve the main page
+// Serve the main page - redirect to Sitecore Launchpad
 app.get('/', (req, res) => {
-    const filePath = path.join(__dirname, '../public/index.html');
-    res.sendFile(filePath);
+    res.redirect('/sitecore-launchpad');
 });
 
 // Error handling middleware
