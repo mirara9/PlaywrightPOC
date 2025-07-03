@@ -772,9 +772,9 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(filePath);
 });
 
-// Serve the main page - redirect to Sitecore Launchpad
+// Serve the login page
 app.get('/', (req, res) => {
-    res.redirect('/sitecore-launchpad');
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Error handling middleware
@@ -797,9 +797,15 @@ app.use((req, res) => {
 // Start server
 app.listen(PORT, () => {
     console.log(`Enhanced test server running at http://localhost:${PORT}`);
+    console.log(`Login Page: http://localhost:${PORT}/`);
+    console.log(`Sitecore Launchpad: http://localhost:${PORT}/sitecore-launchpad (requires login)`);
     console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
     console.log(`Health check: http://localhost:${PORT}/health`);
     console.log(`API endpoints available at http://localhost:${PORT}/api/`);
+    console.log(`\nTest Credentials:`);
+    console.log(`- test@example.com / password123`);
+    console.log(`- admin@example.com / AdminPass789!`);
+    console.log(`- john.doe@example.com / SecurePass123!`);
 });
 
 module.exports = app;

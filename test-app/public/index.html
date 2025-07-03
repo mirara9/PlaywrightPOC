@@ -373,9 +373,13 @@
                 if (response.ok && data.success) {
                     showSuccess('Login successful! Redirecting...');
                     
-                    // Delay before showing dashboard
+                    // Store user session for Sitecore Launchpad
+                    sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                    sessionStorage.setItem('authToken', data.token);
+                    
+                    // Redirect to Sitecore Launchpad
                     setTimeout(() => {
-                        showDashboard(data.user);
+                        window.location.href = '/sitecore-launchpad';
                     }, 1000);
                 } else {
                     showError(data.message || 'Invalid credentials. Please try again.');

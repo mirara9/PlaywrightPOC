@@ -5,11 +5,12 @@
 
 class SitecoreLaunchpad {
     constructor() {
-        this.currentUser = {
-            name: 'Sitecore User',
-            role: 'Content Author',
-            avatar: 'SC'
-        };
+        // Check authentication first
+        if (!this.checkAuthentication()) {
+            return; // Exit if not authenticated
+        }
+        
+        this.currentUser = this.getCurrentUser();
         
         this.stats = {
             contentItems: 1247,
@@ -57,11 +58,61 @@ class SitecoreLaunchpad {
         this.init();
     }
     
+    checkAuthentication() {
+        const currentUser = sessionStorage.getItem('currentUser');
+        const authToken = sessionStorage.getItem('authToken');
+        
+        if (!currentUser || !authToken) {
+            // Redirect to login if not authenticated
+            window.location.href = '/';
+            return false;
+        }
+        
+        // Hide loading overlay if authenticated
+        const authLoading = document.getElementById('authLoading');
+        if (authLoading) {
+            authLoading.style.display = 'none';
+        }
+        
+        return true;
+    }
+    
+    getCurrentUser() {
+        const userSession = sessionStorage.getItem('currentUser');
+        if (userSession) {
+            const user = JSON.parse(userSession);
+            return {
+                name: user.name || 'Sitecore User',
+                role: user.role === 'admin' ? 'Administrator' : 'Content Author',
+                avatar: user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'SC',
+                email: user.email
+            };
+        }
+        
+        return {
+            name: 'Sitecore User',
+            role: 'Content Author',
+            avatar: 'SC'
+        };
+    }
+    
     init() {
         this.setupEventListeners();
+        this.updateUserInterface();
         this.updateDynamicContent();
         this.startPeriodicUpdates();
         this.animateCards();
+    }
+    
+    updateUserInterface() {
+        // Update user information in the header
+        const userNameElement = document.querySelector('[data-testid="user-name"]');
+        const userRoleElement = document.querySelector('[data-testid="user-role"]');
+        const userAvatarElement = document.querySelector('[data-testid="user-avatar"]');
+        
+        if (userNameElement) userNameElement.textContent = this.currentUser.name;
+        if (userRoleElement) userRoleElement.textContent = this.currentUser.role;
+        if (userAvatarElement) userAvatarElement.textContent = this.currentUser.avatar;
     }
     
     setupEventListeners() {
@@ -320,8 +371,12 @@ class SitecoreLaunchpad {
     handleLogout() {
         this.showNotification('Signing out...', 'info');
         
+        // Clear session storage
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('authToken');
+        
         setTimeout(() => {
-            // In a real application, this would redirect to login
+            // Redirect to login page
             window.location.href = '/';
         }, 1500);
     }
@@ -728,6 +783,16 @@ document.head.appendChild(style);
 
 // Initialize the Sitecore Launchpad when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Quick authentication check before initializing
+    const currentUser = sessionStorage.getItem('currentUser');
+    const authToken = sessionStorage.getItem('authToken');
+    
+    if (!currentUser || !authToken) {
+        // Redirect to login immediately if not authenticated
+        window.location.href = '/';
+        return;
+    }
+    
     window.sitecoreLaunchpad = new SitecoreLaunchpad();
 });
 
