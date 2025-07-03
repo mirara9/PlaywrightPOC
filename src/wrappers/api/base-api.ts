@@ -4,7 +4,6 @@ export interface ApiConfig {
   baseURL: string;
   timeout?: number;
   headers?: Record<string, string>;
-  retries?: number;
 }
 
 export interface RequestOptions {
@@ -85,27 +84,4 @@ export abstract class BaseApiWrapper {
     return await response.json();
   }
 
-  protected async retryRequest<T>(
-    requestFn: () => Promise<T>,
-    retries: number = this.config.retries || 3
-  ): Promise<T> {
-    let lastError: Error;
-    
-    for (let i = 0; i <= retries; i++) {
-      try {
-        return await requestFn();
-      } catch (error) {
-        lastError = error as Error;
-        if (i < retries) {
-          await this.delay(1000 * (i + 1));
-        }
-      }
-    }
-    
-    throw lastError!;
-  }
-
-  private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 }

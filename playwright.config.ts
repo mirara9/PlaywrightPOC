@@ -20,8 +20,7 @@ export default defineConfig({
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  // Enhanced retry configuration
-  retries: process.env.RETRY_COUNT ? parseInt(process.env.RETRY_COUNT) : 3,
+  retries: 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {

@@ -2,7 +2,17 @@ import { test, expect } from '@playwright/test';
 import { GooglePage } from '../../wrappers/ui';
 import { TestHelpers } from '../../utils';
 
-test.describe('Google Search Tests', () => {
+/**
+ * Google Search Tests - DISABLED
+ * 
+ * These tests are disabled using test.describe.skip() to prevent them from running
+ * in the test suite. They can be re-enabled by changing test.describe.skip() back
+ * to test.describe() if needed.
+ * 
+ * Reason for disabling: External dependency on Google.com which may cause test 
+ * instability and is not part of the core application functionality.
+ */
+test.describe.skip('Google Search Tests', () => {
   let googlePage: GooglePage;
 
   test.beforeEach(async ({ page }) => {

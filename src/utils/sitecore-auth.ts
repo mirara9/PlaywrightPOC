@@ -16,7 +16,6 @@ export interface SitecoreAuthConfig {
   baseUrl: string;
   credentials: SitecoreCredentials;
   sessionTimeout?: number;
-  retryAttempts?: number;
   autoRelogin?: boolean;
 }
 
@@ -33,7 +32,6 @@ export class SitecoreAuthManager {
     this.context = page.context();
     this.config = {
       sessionTimeout: 30 * 60 * 1000, // 30 minutes default
-      retryAttempts: 3,
       autoRelogin: true,
       ...config
     };
@@ -47,11 +45,10 @@ export class SitecoreAuthManager {
     console.log('🔐 Authenticating with Sitecore...');
     
     try {
-      await this.loginPage.loginWithRetry(
+      await this.loginPage.login(
         this.config.credentials.username,
         this.config.credentials.password,
-        this.config.credentials.domain || 'sitecore',
-        this.config.retryAttempts
+        this.config.credentials.domain || 'sitecore'
       );
       
       this.isAuthenticated = true;
@@ -216,7 +213,7 @@ export class SitecoreAuthManager {
     } catch (error) {
       // Check if error might be due to authentication issues
       if (error.message.includes('login') || error.message.includes('unauthorized')) {
-        console.log('🔄 Possible auth issue, retrying with fresh authentication...');
+        console.log('🔄 Possible auth issue, attempting fresh authentication...');
         await this.authenticate();
         return await fn();
       }
@@ -275,7 +272,6 @@ export class SitecoreAuthHelpers {
       baseUrl,
       credentials,
       sessionTimeout: 30 * 60 * 1000,
-      retryAttempts: 3,
       autoRelogin: true,
       ...options
     };

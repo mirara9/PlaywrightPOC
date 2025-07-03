@@ -271,43 +271,4 @@ export class SitecoreLoginPage extends SitecoreBasePage {
     }
   }
 
-  /**
-   * Login with retry mechanism for flaky authentication
-   */
-  async loginWithRetry(
-    username: string, 
-    password: string, 
-    domain: string = 'sitecore',
-    maxAttempts: number = 3
-  ): Promise<void> {
-    let lastError: Error | null = null;
-    
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        console.log(`🔐 Login attempt ${attempt}/${maxAttempts}`);
-        
-        await this.navigate();
-        await this.login(username, password, domain);
-        
-        // Validate login was successful
-        if (await this.validateLoginSuccess()) {
-          console.log(`✅ Login successful on attempt ${attempt}`);
-          return;
-        } else {
-          throw new Error('Login validation failed');
-        }
-        
-      } catch (error) {
-        lastError = error as Error;
-        console.log(`❌ Login attempt ${attempt} failed: ${lastError.message}`);
-        
-        if (attempt < maxAttempts) {
-          console.log('⏳ Waiting before retry...');
-          await this.page.waitForTimeout(2000);
-        }
-      }
-    }
-    
-    throw new Error(`Login failed after ${maxAttempts} attempts. Last error: ${lastError?.message}`);
-  }
 }
