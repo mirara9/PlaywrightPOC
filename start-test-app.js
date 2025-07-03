@@ -134,10 +134,15 @@ function installDependencies() {
     return new Promise((resolve, reject) => {
         logInfo('Installing test-app dependencies...');
         
-        const installProcess = spawn('npm', ['install'], {
+        // Windows compatibility: use npm.cmd on Windows
+        const isWindows = process.platform === 'win32';
+        const npmCommand = isWindows ? 'npm.cmd' : 'npm';
+        
+        const installProcess = spawn(npmCommand, ['install'], {
             cwd: path.join(__dirname, 'test-app'),
             stdio: 'inherit',
-            shell: true
+            shell: true,
+            windowsHide: true
         });
 
         installProcess.on('close', (code) => {
@@ -152,6 +157,10 @@ function installDependencies() {
 
         installProcess.on('error', (error) => {
             logError(`Failed to start npm install: ${error.message}`);
+            if (isWindows) {
+                logInfo('Try running: cd test-app && npm install');
+                logInfo('Or use: npm.cmd instead of npm');
+            }
             reject(error);
         });
     });
@@ -164,15 +173,20 @@ function startServer(options) {
     
     logInfo(`Starting ${serverType} test-app server on port ${port}...`);
     
+    // Windows compatibility: use npm.cmd on Windows
+    const isWindows = process.platform === 'win32';
+    const npmCommand = isWindows ? 'npm.cmd' : 'npm';
+    
     const env = {
         ...process.env,
         PORT: port.toString()
     };
 
-    const serverProcess = spawn('npm', ['run', scriptName], {
+    const serverProcess = spawn(npmCommand, ['run', scriptName], {
         cwd: path.join(__dirname, 'test-app'),
         stdio: 'inherit',
         shell: true,
+        windowsHide: true,
         env: env
     });
 
@@ -201,30 +215,52 @@ function startServer(options) {
         log('=' .repeat(50), 'blue');
     }, 2000);
 
-    // Handle process termination
-    process.on('SIGINT', () => {
+    // Handle process termination (Windows-compatible)
+    // Note: isWindows already declared above
+    
+    function shutdownServer() {
         log('\n\n🛑 Shutting down server...', 'yellow');
-        serverProcess.kill('SIGINT');
+        if (isWindows) {
+            // Windows doesn't support SIGINT the same way
+            serverProcess.kill();
+        } else {
+            serverProcess.kill('SIGINT');
+        }
         setTimeout(() => {
             log('Server stopped', 'green');
             process.exit(0);
         }, 1000);
-    });
-
-    process.on('SIGTERM', () => {
-        serverProcess.kill('SIGTERM');
-        process.exit(0);
-    });
+    }
+    
+    process.on('SIGINT', shutdownServer);
+    process.on('SIGTERM', shutdownServer);
+    
+    // Windows-specific handling
+    if (isWindows) {
+        process.on('SIGBREAK', shutdownServer);
+        // Handle Ctrl+C on Windows
+        if (process.platform === 'win32') {
+            const rl = require('readline').createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            rl.on('SIGINT', shutdownServer);
+        }
+    }
 
     serverProcess.on('close', (code) => {
-        if (code !== 0) {
+        if (code !== 0 && code !== null) {
             logError(`Server process exited with code ${code}`);
         }
-        process.exit(code);
+        process.exit(code || 0);
     });
 
     serverProcess.on('error', (error) => {
         logError(`Failed to start server: ${error.message}`);
+        if (isWindows && error.code === 'ENOENT') {
+            logInfo('Windows users: Make sure Node.js and npm are in your PATH');
+            logInfo('Try running from Command Prompt as Administrator');
+        }
         process.exit(1);
     });
 }

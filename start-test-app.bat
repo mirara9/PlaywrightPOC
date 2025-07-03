@@ -17,6 +17,24 @@ if %errorlevel% neq 0 (
 
 echo Node.js found: 
 node --version
+
+REM Check for npm command (prefer npm.cmd on Windows)
+where npm.cmd >nul 2>&1
+if %errorlevel% equ 0 (
+    set "NPM_CMD=npm.cmd"
+    echo npm.cmd found
+) else (
+    where npm >nul 2>&1
+    if %errorlevel% equ 0 (
+        set "NPM_CMD=npm"
+        echo npm found
+    ) else (
+        echo ERROR: npm not found in PATH
+        echo Please ensure Node.js is properly installed
+        pause
+        exit /b 1
+    )
+)
 echo.
 
 REM Check for command line arguments

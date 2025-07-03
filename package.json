@@ -80,7 +80,9 @@
     "start:test-app": "node start-test-app.js",
     "start:test-app:enhanced": "node start-test-app.js --enhanced",
     "start:test-app:basic": "node start-test-app.js --basic",
-    "start:test-app:port": "node start-test-app.js --port"
+    "start:test-app:port": "node start-test-app.js --port",
+    "test:windows-compatibility": "node test-windows-compatibility.js",
+    "test:launcher": "node start-test-app.js --help"
   },
   "keywords": [
     "playwright",
