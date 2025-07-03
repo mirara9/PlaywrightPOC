@@ -133,12 +133,12 @@ HEADLESS=true npm test
 
 # Run specific test suites
 npm run test:api              # API tests (local server)
-npm run test:ui:selenium      # UI tests (external Selenium test page)  
-npm run test:integration      # Integration tests (API + UI combined)
+npm run test:ui               # UI tests
+npm run test:integration      # Integration tests
 
 # Run specific test suites in headless mode
 npm run test:api:headless              # API tests headless
-npm run test:ui:selenium:headless      # UI tests headless
+npm run test:ui:headless               # UI tests headless
 npm run test:integration:headless      # Integration tests headless
 
 # Run tests with specific grep pattern
@@ -154,19 +154,19 @@ Tests the local test app server at `http://localhost:3000`:
 - Data validation and error handling
 - Response format validation
 
-### **UI Tests** (`npm run test:ui:selenium`)
-Tests the external Selenium test form at `https://automationintesting.com/selenium/testpage/`:
+### **UI Tests** (`npm run test:ui`)
+Tests UI interactions using the base page object patterns:
 - Form element interactions (inputs, dropdowns, checkboxes, radio buttons)
-- Form validation and submission
+- Page navigation and element validation
 - Cross-browser compatibility
 - Realistic user workflows
 
 ### **Integration Tests** (`npm run test:integration`) 
-Combines API and UI testing for realistic workflows:
-- Create users via API, use data in UI forms
-- End-to-end user journey testing
-- Data consistency validation between API and UI
-- Error handling across both layers
+Demonstrates patterns for combining API and UI testing:
+- API and UI interaction patterns
+- Data consistency validation approaches
+- Error handling across multiple layers
+- End-to-end workflow examples
 
 For detailed information about the new test structure, see [NEW-TEST-STRUCTURE.md](./NEW-TEST-STRUCTURE.md).
 

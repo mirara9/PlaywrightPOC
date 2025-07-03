@@ -5,39 +5,38 @@ This document describes the updated test structure that separates API and UI tes
 ## 🎯 **What Changed**
 
 The testing framework now focuses on:
-- **API Tests**: Continue to use the local test app server (localhost:3000)
-- **UI Tests**: Now test the external Selenium Test Form (automationintesting.com)
+- **API Tests**: Use the local test app server (localhost:3000)
+- **UI Tests**: Test external web applications and forms
 - **Integration Tests**: Combine both API and UI testing in realistic workflows
 
 ## 📁 **New Test Files**
 
-### 1. **UI Tests - Selenium Test Form**
-**File**: `src/tests/ui/selenium-test-form.ui.test.ts`
+### 1. **UI Tests**
+**Note**: External test pages previously used are no longer available.
 
-Tests the form at https://automationintesting.com/selenium/testpage/ with:
+The framework provides base classes and utilities for:
 - ✅ Form element validation (inputs, dropdowns, checkboxes, radio buttons)
-- ✅ Form filling and submission
-- ✅ Data validation and clearing
+- ✅ Form filling and submission patterns
+- ✅ Data validation and clearing methods
 - ✅ Retry capability with NUnit-style retries
 - ✅ Cross-browser compatibility
 - ✅ Realistic user interactions (slow typing, multi-select)
 
-### 2. **Integration Tests - API + UI Combined**
-**File**: `src/tests/integration/api-ui-integration.test.ts`
+### 2. **Integration Tests**
+**Note**: Integration tests combining API and UI have been simplified.
 
-Demonstrates realistic workflows combining:
+The framework demonstrates patterns for:
 - ✅ User creation via API (local test app)
-- ✅ Form filling via UI (external test page)
 - ✅ Data consistency validation
 - ✅ Error handling scenarios
 - ✅ Complete user journey workflows
 - ✅ Retry functionality for both API and UI
 
-### 3. **Page Object Model - Selenium Test Page**
-**File**: `src/wrappers/ui/selenium-test-page.ts`
+### 3. **Page Object Model**
+**Note**: External page objects have been removed.
 
-Complete page object for the automation testing form with:
-- ✅ All form element locators
+The framework provides base classes for creating page objects with:
+- ✅ Element locator patterns
 - ✅ Form interaction methods
 - ✅ Data validation utilities
 - ✅ Clear and submit functionality
@@ -49,18 +48,18 @@ Complete page object for the automation testing form with:
 ### Updated `playwright.config.ts`
 ```typescript
 testMatch: [
-  'src/tests/api/**/*.test.ts',                           // API tests (local server)
-  'src/tests/ui/selenium-test-form.ui.test.ts',           // UI tests (external site)
-  'src/tests/integration/api-ui-integration.test.ts'      // Integration tests
+  'src/tests/api/**/*.test.ts',           // API tests (local server)
+  'src/tests/ui/**/*.test.ts',            // UI tests
+  'src/tests/integration/**/*.test.ts'    // Integration tests
 ]
 ```
 
-### New npm Scripts
+### npm Scripts
 ```json
 {
-  "test:ui:selenium": "playwright test src/tests/ui/selenium-test-form.ui.test.ts",
-  "test:integration": "playwright test src/tests/integration/api-ui-integration.test.ts",
-  "test:all-old": "playwright test src/tests --ignore-pattern='**/selenium-test-form.ui.test.ts'"
+  "test:api": "playwright test src/tests/api/",
+  "test:ui": "playwright test src/tests/ui/",
+  "test:integration": "playwright test src/tests/integration/"
 }
 ```
 
@@ -70,75 +69,51 @@ testMatch: [
 ```bash
 npm test
 ```
-**Runs**: API tests + New UI tests + New Integration tests
+**Runs**: API tests + UI tests + Integration tests
 
 ### Individual Test Suites
 ```bash
 # API tests only (uses local server)
 npm run test:api
 
-# UI tests only (external site)
-npm run test:ui:selenium
+# UI tests only
+npm run test:ui
 
 # Integration tests only
 npm run test:integration
-
-# All old tests (for comparison)
-npm run test:all-old
 ```
 
-## 🎭 **Test Examples**
+## 🎭 **Test Pattern Examples**
 
-### Basic Form Testing
+### Basic API Testing Pattern
 ```typescript
-test('should fill and validate form inputs correctly', async ({ page }) => {
-  const testPage = new SeleniumTestPage(page);
-  await testPage.navigate();
+test('should create and validate user via API', async ({ request }) => {
+  const apiWrapper = new TestApiWrapper(request);
   
-  const testData = {
-    firstName: 'Alice',
-    surname: 'Johnson',
-    gender: 'Female' as const,
-    colors: ['red', 'blue'] as readonly ('red' | 'blue')[],
-    contactMethod: 'email' as const,
-    continents: ['Asia', 'Europe']
-  };
+  const newUser = await apiWrapper.createUser({
+    name: 'Test User',
+    email: 'test@example.com',
+    password: 'SecurePass123!',
+    username: 'testuser'
+  });
   
-  await testPage.fillTestForm(testData);
-  const formData = await testPage.getFormData();
-  
-  expect(formData.firstName).toBe(testData.firstName);
-  expect(formData.surname).toBe(testData.surname);
+  expect(newUser.name).toBe('Test User');
+  expect(newUser.email).toBe('test@example.com');
 });
 ```
 
-### API + UI Integration
+### UI Testing Pattern (Example)
 ```typescript
-test('should create user via API and use data in UI form', async ({ page, request }) => {
-  // Create user via API
-  const apiWrapper = new TestApiWrapper(request);
-  const newUser = await apiWrapper.createUser({
-    name: 'Integration User',
-    email: 'integration@example.com',
-    password: 'SecurePass123!',
-    username: 'intuser'
-  });
+test('should interact with page elements', async ({ page }) => {
+  const basePage = new BasePage(page, '/your-page');
+  await basePage.navigate();
   
-  // Use API data in UI form
-  const testPage = new SeleniumTestPage(page);
-  await testPage.navigate();
+  // Use base page methods for common operations
+  await basePage.fillInput(page.locator('#input'), 'test value');
+  await basePage.clickElement(page.locator('#button'));
   
-  const [firstName, surname] = newUser.name.split(' ');
-  await testPage.fillTestForm({
-    firstName,
-    surname: surname || 'User',
-    gender: 'Male',
-    colors: ['red'],
-    contactMethod: 'email',
-    continents: ['Europe']
-  });
-  
-  await testPage.submitForm();
+  // Add your specific assertions
+  await expect(page.locator('#result')).toBeVisible();
 });
 ```
 
