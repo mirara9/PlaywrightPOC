@@ -71,7 +71,7 @@ jobs:
 
       - name: Create Pull Request
         if: steps.check_changes.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
@@ -151,7 +151,7 @@ jobs:
           sed -i "s/playwright:v[0-9.]*/playwright:v${PLAYWRIGHT_VERSION}/" Dockerfile
           
       - name: Create Pull Request for Playwright update
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
