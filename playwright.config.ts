@@ -11,11 +11,12 @@ if (process.env.NODE_ENV !== 'test') {
 
 export default defineConfig({
   testDir: './src/tests',
-  // Only run specific test files for main test command
+  // Run all test files for main test command
   testMatch: [
     'src/tests/api/**/*.test.ts',                           // API tests (uses local server)
-    'src/tests/ui/selenium-test-form.ui.test.ts',           // New UI tests (external site)
-    'src/tests/integration/api-ui-integration.test.ts'      // New integration tests
+    'src/tests/ui/**/*.test.ts',                            // UI tests (including dashboard tests)
+    'src/tests/integration/**/*.test.ts',                   // Integration tests
+    'src/tests/unit/**/*.test.ts'                           // Unit tests
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -74,7 +75,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'cd test-app && npm install && npm start',
+    command: 'cd test-app && npm install && npm run start:enhanced',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
